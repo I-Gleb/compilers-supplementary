@@ -241,6 +241,14 @@ fun stackOpnd (opnd) {
   esac      
 }
 
+-- Checks if an operand resides in a register
+fun registerOpnd (opnd) {
+  case opnd of
+    R (_) -> true
+  | _     -> false
+  esac      
+}
+
 -- Checks if an operand resides in memory
 fun memOpnd (opnd) {
   case opnd of
@@ -314,12 +322,18 @@ fun compile (env, code) {
             case env.allocate of
               [s, env] -> 
                 if isCmp(op) 
-                then [env, code <+ Mov(opnd1, eax) <+ Binop("cmp", eax, opnd2) <+ Set(suffix(op), "%al") <+ Mov(eax, s)]
+                then if registerOpnd (opnd1) !! registerOpnd (opnd2)
+                     then [env, code <+ Binop("cmp", opnd1, opnd2) <+ Set(suffix(op), "%al") <+ Mov(eax, s)]
+                     else [env, code <+ Mov(opnd2, eax) <+ Binop("cmp", opnd1, eax) <+ Set(suffix(op), "%al") <+ Mov(eax, s)]
+                     fi
                 else 
                   case op of
                       "/" -> [env, code <+ Mov (opnd2, eax) <+ Cltd <+ IDiv(opnd1) <+ Mov (eax, s)]
                     | "%" -> [env, code <+ Mov (opnd2, eax) <+ Cltd <+ IDiv(opnd1) <+ Mov (edx, s)]
-                    | op -> [env, code <+ Mov (opnd2, eax) <+ Binop(op, opnd1, eax) <+ Mov(eax, s)]
+                    | op -> if registerOpnd (opnd1) !! registerOpnd (opnd2) 
+                            then [env, code <+ Binop(op, opnd1, opnd2) <+ Mov(opnd2, s)]
+                            else [env, code <+ Mov (opnd2, eax) <+ Binop(op, opnd1, eax) <+ Mov(eax, s)]
+                            fi
                   esac
                 fi
             esac

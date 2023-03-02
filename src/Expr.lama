@@ -23,18 +23,18 @@ public fun evalExpr (st, expr) {
 
 public fun evalBinop (op, a, b) {
   case op of
-    "+" -> a + b
-  | "-" -> a - b
-  | "*" -> a * b
-  | "/" -> a / b
-  | "%" -> a % b
-  | "==" -> a == b
-  | "!=" -> a != b
-  | "<" -> a < b
-  | "<=" -> a <= b
-  | ">" -> a > b
-  | ">=" -> a >= b
-  | "&&" -> a && b
-  | "!!" -> a !! b
-  esac
+    "+" -> infix +
+  | "-" -> infix -
+  | "*" -> infix *
+  | "/" -> infix /
+  | "%" -> infix %
+  | "==" -> infix ==
+  | "!=" -> infix !=
+  | "<" -> infix <
+  | "<=" -> infix <=
+  | ">" -> infix >
+  | ">=" -> infix >=
+  | "&&" -> infix &&
+  | "!!" -> infix !!
+  esac (a, b)
 }
